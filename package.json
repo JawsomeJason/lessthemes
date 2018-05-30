@@ -1,0 +1,8 @@
+{
+  "name": "lessthemes",
+  "version": "1.0.0",
+  "description": "An advanced LESS theming mixin library",
+  "main": "index.js",
+  "author": "Jason Featheringham <jason@thejase.com>",
+  "license": "MIT"
+}

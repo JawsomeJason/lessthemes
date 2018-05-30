@@ -1,0 +1,148 @@
+// LESS-baked color theming (because IE sucks and doesn't support CSS Custom Properties)
+
+// ===========USAGE===========
+// **Back.less**
+// @import "~lessthemes/lib/themes.less";
+
+// // ...here's how easy it is to use
+// .back {
+//   #THEMES.apply({
+//     background-color: @primary;
+//   });
+//   // oh 💩, you just applied bg color theming for
+//   // every defined theme (including the default theme)
+// }
+//
+// **Front.less**
+// .front {
+//   // need just the primary color for aqua?  No prob!
+//   #THEMES.vars(aqua);
+//   color: @primary;
+// }
+//
+//
+
+
+// namespace this set of mixins so we never conflict with other libraries or plugins.
+// plus, these variables won't leak into global scope.
+// see http://lesscss.org/features/#mixins-feature-namespaces for details on how mixin namespacing works
+#THEMES {
+  // colors we're gonna use
+  @aqua: #63cfe3;
+  @dark-aqua: #00667D;
+
+  // some color <-> darks are harder to read, so we need a wider spectrum
+  @green: #007167;
+  @dark-green: #00463c;
+  @light-green: #8dd4bd;
+
+
+  @orange: #f15f40;
+  @dark-orange: #c3271b;
+  @light-orange: #f5a800;
+
+  @purple: #61366e;
+  @dark-purple: #381460;
+
+
+  // this mixin will apply the same rules to all themes
+  // THIS WILL BE THE THING YOU USE THE MOST!
+  // Usage:
+  // .foo {
+  //   width: 20px;
+  //   #THEMES.apply({ background-color: @primary })
+  // }
+  // Output:
+  // .foo {
+  //   width: 20px;
+  //   background-color: #555;
+  // }
+  // :global(.theme-aqua) .foo { background-color: #63cfe3; }
+  // :global(.theme-green) .foo { background-color: #007167; }
+  // ...etc
+  .apply(@rules) {
+    .apply(aqua, @rules);
+    .apply(green, @rules);
+    .apply(orange, @rules);
+    .apply(purple, @rules);
+    .apply(anything-else, @rules);
+  }
+
+  // same as above, but only one named theme
+  // Usage:
+  // .foo {
+  //   // some thing that should only have an aqua theme
+  //   #THEME.apply(aqua, { background-color: @primary });
+  // }
+  .apply(@name, @rules) {
+    // get theme variables
+    .vars(@name);
+    // wrap CSS in theme's selector
+    ._wrap(@selector, @rules);
+  }
+
+  // JUST NEED THE VARIABLES FOR SOME REASON?
+  // Usage:
+  // .foo {
+  //   #THEMES.vars(aqua);
+  //   background-color: @primary;
+  //   color: @contrast;
+  // }
+
+  // default theme when name is invalid
+  .vars(@name) when (default()) {
+    @primary: #555;
+    @contrast: #ddd;
+    @highlight: #333;
+    @highlight-contrast: #ddd;
+    // default shouldn't have a wrapper selector
+    @selector: ~""
+  }
+
+  // ADD OR EDIT NAMED THEMES HERE
+
+  // define each theme with the same variables, assigning different color values.
+  .vars(@name) when (@name = aqua) {
+    @primary: @aqua;
+    @contrast: @dark-aqua;
+    @highlight: @dark-aqua;
+    @highlight-contrast: @aqua;
+    // ~"" means unquoted.  LESS doesn't like inline selectors as values, so we cheat.
+    @selector: ~".theme-aqua";
+  }
+
+  .vars(@name) when (@name = green) {
+    @primary: @green;
+    @contrast: @light-green;
+    @highlight: @dark-green;
+    @highlight-contrast: @light-green;
+    @selector: ~".theme-green";
+  }
+
+  .vars(@name) when (@name = orange) {
+    @primary: @orange;
+    @contrast: @light-orange;
+    @highlight: @dark-orange;
+    @highlight-contrast: @light-orange;
+    @selector: ~".theme-orange";
+  }
+
+  .vars(@name) when (@name = purple) {
+    @primary: @purple;
+    @contrast: @aqua;
+    @highlight: @dark-purple;
+    @highlight-contrast: @aqua;
+    @selector: ~".theme-purple";
+  }
+
+  // these private-ish mixins will wrap rules in a selector ONLY IF the selector is not empty.
+  ._wrap(@selector, @rules) when (@selector = ~"") {
+    @rules();
+  }
+
+  ._wrap(@selector, @rules) when (default()) {
+    @{selector} & {
+      @rules();
+    }
+  }
+}
